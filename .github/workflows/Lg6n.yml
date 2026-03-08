@@ -1,37 +1,44 @@
-name: Build OrangeFox Final
+name: Build OrangeFox Tecno LG6n
 
 on:
-  push:
-    branches: [ "main" ]
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Ambil Bahan
+      - name: Checkout Repo
         uses: actions/checkout@v4
 
-      - name: Ekstrak ZIP Jadi 32MB
+      - name: Bersihin Storage Server
         run: |
-          mkdir -p output
-          # Membuka ZIP Abang (boot.zip)
-          unzip -o boot.zip
+          sudo rm -rf /usr/share/dotnet /etc/mysql /usr/local/lib/android /opt/ghc
+          sudo apt-get update
+          sudo apt-get install -y bc build-essential zip curl libstdc++6 git wget python3 gcc g++ libssl-dev repo
           
-          # Mencari file .img yang ukurannya besar (32MB)
-          FILE_IMG=$(find . -name "*.img" | head -n 1)
-          
-          if [ -z "$FILE_IMG" ]; then
-            echo "--- ERROR: FILE .IMG TIDAK KETEMU DI DALAM ZIP! ---"
-            exit 1
-          fi
-          
-          echo "Ditemukan file asli: $FILE_IMG"
-          # Menjadikan file tersebut hasil akhir OrangeFox
-          cp "$FILE_IMG" output/OrangeFox-Tecno-LG6n.img
+      - name: Sync OrangeFox Source
+        run: |
+          mkdir fox && cd fox
+          repo init --depth=1 -u https://gitlab.com -b fox_12.1
+          repo sync -j$(nproc --all) --force-sync
 
-      - name: Siapkan Link Download
+      - name: Ekstrak Device Tree
+        run: |
+          mkdir -p fox/device/tecno/LG6n
+          unzip Device_Tree_Orange*.zip -d fox/device/tecno/LG6n
+
+      - name: Build OrangeFox
+        run: |
+          cd fox
+          source build/envsetup.sh
+          export ALLOW_MISSING_DEPENDENCIES=true
+          export FOX_VERSION="R11.1_Unofficial"
+          export LC_ALL="C"
+          lunch omni_TECNO-LG6n-eng
+          mka recoveryimage -j$(nproc --all)
+
+      - name: Upload Hasil Jadi
         uses: actions/upload-artifact@v4
         with:
-          name: HASIL-ORANGEFOX-ABANG
-          path: output/OrangeFox-Tecno-LG6n.img
+          name: OrangeFox-LG6n
+          path: fox/out/target/product/LG6n/*.img
