@@ -1,4 +1,4 @@
-name: Build OrangeFox Tecno LG6n Final
+name: Build OrangeFox Tecno LG6n
 
 on:
   workflow_dispatch:
@@ -7,7 +7,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: 1. Checkout Bahan
+      - name: 1. Ambil Bahan dari Repo
         uses: actions/checkout@v4
 
       - name: 2. Install Alat Tempur
@@ -15,32 +15,29 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y bc build-essential zip curl libstdc++6 git wget python3 gcc g++ libssl-dev repo
           
-      - name: 3. Sync Source OrangeFox (Pusat Kode)
+      - name: 3. Download Source OrangeFox
         run: |
           mkdir fox && cd fox
           repo init --depth=1 -u https://github.com -b fox_12.1
-          repo sync -j$(nproc --all) --force-sync --no-clone-bundle --no-tags
+          repo sync -c -j$(nproc --all) --force-sync --no-clone-bundle --no-tags
 
-      - name: 4. Ekstrak Device Tree Kamu
+      - name: 4. Bongkar ZIP Device Tree
         run: |
           mkdir -p fox/device/tecno/LG6n
           unzip tree.zip -d fox/device/tecno/LG6n
-          # Cek isi biar yakin filenya gak nyasar
-          ls -R fox/device/tecno/LG6n
 
-      - name: 5. Mulai Compile (Masak)
+      - name: 5. Mulai Masak (Compile)
         run: |
           cd fox
           source build/envsetup.sh
           export ALLOW_MISSING_DEPENDENCIES=true
           export FOX_VERSION="R11.1_Unofficial"
           export LC_ALL="C"
-          # Sesuai identitas device kamu: omni_TECNO-LG6n
           lunch omni_TECNO-LG6n-eng
           mka recoveryimage -j$(nproc --all)
 
-      - name: 6. Upload Hasil (.img)
+      - name: 6. Upload Hasil Jadi (.img)
         uses: actions/upload-artifact@v4
         with:
-          name: OrangeFox-Tecno-LG6n
+          name: OrangeFox-LG6n
           path: fox/out/target/product/LG6n/*.img
