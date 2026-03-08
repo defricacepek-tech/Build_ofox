@@ -20,7 +20,7 @@ jobs:
         run: |
           mkdir fox && cd fox
           # GANTI KE LINK GITHUB BIAR GAK ERROR 403
-          repo init --depth=1 -u https://github.com -b fox_12.1
+          repo init --depth=1 -u Device_Tree_OrangeFox.zip-b fox_12.1
           repo sync -j$(nproc --all) --force-sync --no-clone-bundle --no-tags
 
       - name: Ekstrak Device Tree
