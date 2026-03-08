@@ -10,17 +10,18 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v4
 
-      - name: Bersihin Storage Server
+      - name: Siapin Tools & Storage
         run: |
           sudo rm -rf /usr/share/dotnet /etc/mysql /usr/local/lib/android /opt/ghc
           sudo apt-get update
           sudo apt-get install -y bc build-essential zip curl libstdc++6 git wget python3 gcc g++ libssl-dev repo
           
-      - name: Sync OrangeFox Source
+      - name: Sync OrangeFox Source (A12.1)
         run: |
           mkdir fox && cd fox
-          repo init --depth=1 -u https://gitlab.com -b fox_12.1
-          repo sync -j$(nproc --all) --force-sync
+          # GANTI KE LINK GITHUB BIAR GAK ERROR 403
+          repo init --depth=1 -u https://github.com -b fox_12.1
+          repo sync -j$(nproc --all) --force-sync --no-clone-bundle --no-tags
 
       - name: Ekstrak Device Tree
         run: |
