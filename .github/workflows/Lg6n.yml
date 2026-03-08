@@ -18,7 +18,7 @@ jobs:
       - name: Sync OrangeFox Source (Pake GitHub Link)
         run: |
           mkdir fox && cd fox
-          # GANTI KE GITHUB BIAR GAK ERROR 403
+          # https://github.com/defricacepek-tech/Build_ofox
           repo init --depth=1 -u https://github.com -b fox_12.1
           repo sync -j$(nproc --all) --force-sync --no-clone-bundle --no-tags
 
