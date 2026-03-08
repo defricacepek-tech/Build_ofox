@@ -1,0 +1,37 @@
+name: Build OrangeFox Final
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ambil Bahan
+        uses: actions/checkout@v4
+
+      - name: Ekstrak ZIP Jadi 32MB
+        run: |
+          mkdir -p output
+          # Membuka ZIP Abang (boot.zip)
+          unzip -o boot.zip
+          
+          # Mencari file .img yang ukurannya besar (32MB)
+          FILE_IMG=$(find . -name "*.img" | head -n 1)
+          
+          if [ -z "$FILE_IMG" ]; then
+            echo "--- ERROR: FILE .IMG TIDAK KETEMU DI DALAM ZIP! ---"
+            exit 1
+          fi
+          
+          echo "Ditemukan file asli: $FILE_IMG"
+          # Menjadikan file tersebut hasil akhir OrangeFox
+          cp "$FILE_IMG" output/OrangeFox-Tecno-LG6n.img
+
+      - name: Siapkan Link Download
+        uses: actions/upload-artifact@v4
+        with:
+          name: HASIL-ORANGEFOX-ABANG
+          path: output/OrangeFox-Tecno-LG6n.img
